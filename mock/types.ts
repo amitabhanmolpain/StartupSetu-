@@ -73,7 +73,7 @@ export interface Problem {
 }
 
 export interface ScoreItem {
-  key: "fit" | "feasibility" | "track" | "scalability";
+  key: string;
   label: string;
   score: number;
   confidence: number;

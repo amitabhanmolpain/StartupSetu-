@@ -28,6 +28,8 @@ interface Ctx {
   toast: (kind: ToastKind, title: string, body?: string) => void;
   approvedMilestones: string[];
   approveMilestone: (key: string) => void;
+  liveEval: any;
+  setLiveEval: (data: any) => void;
 }
 
 const StoreCtx = createContext<Ctx | null>(null);
@@ -47,17 +49,18 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
   const [statuses, setStatuses] = useState<Record<string, ApplicationStatus>>({});
   const [extraAudit, setExtraAudit] = useState<AuditEvent[]>([]);
   const [approvedMilestones, setApproved] = useState<string[]>([]);
+  const [liveEval, setLiveEval] = useState<any>(null);
 
   useEffect(() => {
     setUser(safeGet<DemoUser>(LS_USER));
-    const s = safeGet<{ statuses: Record<string, ApplicationStatus>; audit: AuditEvent[]; milestones: string[] }>(LS_STATE);
-    if (s) { setStatuses(s.statuses ?? {}); setExtraAudit(s.audit ?? []); setApproved(s.milestones ?? []); }
+    const s = safeGet<{ statuses: Record<string, ApplicationStatus>; audit: AuditEvent[]; milestones: string[]; liveEval: any }>(LS_STATE);
+    if (s) { setStatuses(s.statuses ?? {}); setExtraAudit(s.audit ?? []); setApproved(s.milestones ?? []); setLiveEval(s.liveEval ?? null); }
     setReady(true);
   }, []);
 
   useEffect(() => {
-    if (ready) safeSet(LS_STATE, { statuses, audit: extraAudit, milestones: approvedMilestones });
-  }, [statuses, extraAudit, approvedMilestones, ready]);
+    if (ready) safeSet(LS_STATE, { statuses, audit: extraAudit, milestones: approvedMilestones, liveEval });
+  }, [statuses, extraAudit, approvedMilestones, liveEval, ready]);
 
   // Toasts live in <Toaster>'s own state: showing one re-renders only the toaster, not every page.
   const toast = useCallback((kind: ToastKind, title: string, body?: string) => pushToast({ kind, title, body }), []);
@@ -94,8 +97,8 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
 
   // Stable context value: consumers re-render only when demo state actually changes.
   const value = useMemo(
-    () => ({ user, ready, login, logout, statusOf, setStatus, audit, addAudit, toast, approvedMilestones, approveMilestone }),
-    [user, ready, login, logout, statusOf, setStatus, audit, addAudit, toast, approvedMilestones, approveMilestone],
+    () => ({ user, ready, login, logout, statusOf, setStatus, audit, addAudit, toast, approvedMilestones, approveMilestone, liveEval, setLiveEval }),
+    [user, ready, login, logout, statusOf, setStatus, audit, addAudit, toast, approvedMilestones, approveMilestone, liveEval, setLiveEval],
   );
 
   return (

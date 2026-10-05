@@ -6,9 +6,12 @@ import { EvaluationBreakdown, ClaimsList, RiskFlags, ChallengerFindings } from "
 import { evaluationFor, agents } from "@/mock/evaluations";
 import { agentIcons } from "@/components/ai/agentIcons";
 import { problemById } from "@/mock/problems";
+import { useStore } from "@/lib/store";
+import { adaptLiveEval } from "@/lib/adapter";
 
 export default function StartupEvaluation() {
-  const ev = evaluationFor("APP-2041")!;
+  const { liveEval } = useStore();
+  const ev = liveEval ? adaptLiveEval(liveEval, "APP-LIVE") : evaluationFor("APP-2041")!;
   const p = problemById("plastic-recycling")!;
   const [tab, setTab] = useState<"Claims" | "Risks" | "Challenger">("Claims");
   const [how, setHow] = useState(false);

@@ -10,6 +10,7 @@ import { EvaluationBreakdown, RiskFlags, ChallengerFindings, ClaimsList } from "
 import { agents, biasCheck, evaluationFor } from "@/mock/evaluations";
 import { startupById } from "@/mock/startups";
 import { useStore } from "@/lib/store";
+import { adaptLiveEval } from "@/lib/adapter";
 
 const allDone = () => Object.fromEntries(agents.map((a) => [a.id, "done"])) as Record<string, AgentState>;
 // Agents run in this order; Solution & Track Record run in parallel.
@@ -20,9 +21,9 @@ export default function AIEvaluationCenter() {
   const [running, setRunning] = useState(false);
   const [reveal, setReveal] = useState(false);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
-  const { toast, addAudit } = useStore();
-  const ev = evaluationFor("APP-2041")!;
-  const s = startupById("ecotech");
+  const { toast, addAudit, liveEval } = useStore();
+  const ev = liveEval ? adaptLiveEval(liveEval, "APP-LIVE") : evaluationFor("APP-2041")!;
+  const s = liveEval ? { ...startupById("ecotech"), name: "Live Evaluated Startup" } : startupById("ecotech");
   const finished = agents.every((a) => states[a.id] === "done");
 
   useEffect(() => () => timers.current.forEach(clearTimeout), []);

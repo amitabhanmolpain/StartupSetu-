@@ -29,14 +29,15 @@ function Upl({ label, accept, file, setFile, hint }: { label: string; accept: st
   );
 }
 
-function Processing() {
+function Processing({ isEvaluating }: { isEvaluating: boolean }) {
   const [done, setDone] = useState(0);
   useEffect(() => {
     if (done >= agents.length) return;
     const t = setTimeout(() => setDone((d) => d + 1), 700);
     return () => clearTimeout(t);
   }, [done]);
-  const finished = done >= agents.length;
+  // Only finished when the fake agents are done AND the real API call has returned.
+  const finished = done >= agents.length && !isEvaluating;
   return (
     <div>
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
@@ -53,6 +54,11 @@ function Processing() {
           );
         })}
       </div>
+      {done >= agents.length && isEvaluating && (
+         <div className="mt-5 text-sm text-ai-300 animate-pulse flex items-center gap-2">
+            <Loader2 className="h-4 w-4 animate-spin" /> Finalizing real AI evaluation...
+         </div>
+      )}
       {finished && (
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mt-5 flex flex-wrap items-center gap-3">
           <LinkButton href="/startup/evaluation">View my AI evaluation <ArrowRight className="h-4 w-4" /></LinkButton>
@@ -64,9 +70,10 @@ function Processing() {
 }
 
 export function ApplyForm({ problemTitle, onCancel }: { problemTitle: string; onCancel: () => void }) {
-  const { toast, addAudit, user } = useStore();
+  const { toast, addAudit, user, setLiveEval } = useStore();
   const [step, setStep] = useState(0);
   const [submitted, setSubmitted] = useState(false);
+  const [isEvaluating, setIsEvaluating] = useState(false);
   const [video, setVideo] = useState("");
   const [proposal, setProposal] = useState("");
   const [past, setPast] = useState("");
@@ -80,13 +87,40 @@ export function ApplyForm({ problemTitle, onCancel }: { problemTitle: string; on
     if (step === 3 && (!f.cost || !f.consent)) return "Enter your sealed cost estimate and accept the declaration.";
     return "";
   };
-  const next = () => {
+  const next = async () => {
     const e = validate(); setErr(e); if (e) return;
     if (step < 3) setStep(step + 1);
     else {
       setSubmitted(true);
+      setIsEvaluating(true);
       addAudit({ actor: user?.org ?? "EcoTech Solutions", role: "Startup Owner", action: `Application submitted for ${problemTitle} (sealed bid encrypted)`, kind: "human" });
-      toast("success", "Application submitted", "AI agents have started evaluating your application.");
+      toast("info", "Evaluating...", "AI agents have started evaluating your application.");
+      
+      try {
+        const res = await fetch("/api/evaluate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            startupName: user?.org ?? "EcoTech Solutions",
+            problemStatement: problemTitle,
+            solution: f.summary || "N/A",
+            technology: f.tech || "N/A",
+            previousWork: f.pastText || "N/A",
+            pricing: f.cost || "N/A",
+            team: "2 members",
+            impact: f.impact || "N/A",
+          })
+        });
+        if (res.ok) {
+          const evalData = await res.json();
+          setLiveEval(evalData);
+          toast("success", "Evaluation Complete", "AI has successfully evaluated your application.");
+        }
+      } catch (err) {
+        toast("error", "Evaluation Failed", "Could not complete evaluation.");
+      } finally {
+        setIsEvaluating(false);
+      }
     }
   };
   const fill = () => {
@@ -107,7 +141,7 @@ export function ApplyForm({ problemTitle, onCancel }: { problemTitle: string; on
             <p className="mt-1 text-sm text-slate-400">Your cost estimate is sealed. Seven AI agents are now evaluating your application independently.</p>
           </div>
         </div>
-        <div className="mt-6"><Processing /></div>
+        <div className="mt-6"><Processing isEvaluating={isEvaluating} /></div>
         <AIDisclaimer className="mt-6">AI agents only produce a recommendation with reasons. Selection is made by department officers and experts.</AIDisclaimer>
       </Card>
     );

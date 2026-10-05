@@ -9,15 +9,26 @@ import { PageHeader, Card, Badge, RiskBadge, StatusBadge, Button, Drawer, Modal,
 import { EvaluationBreakdown, ClaimsList, RiskFlags, ChallengerFindings } from "@/components/ai/Explainability";
 import { rankedForProblem, type Ranked } from "@/mock/govExtra";
 import { useStore } from "@/lib/store";
+import { adaptLiveEval } from "@/lib/adapter";
 import { chartColors, tooltipProps } from "@/components/charts/theme";
 import { cn } from "@/lib/format";
 import { StartupAvatar } from "@/components/gov/StartupAvatar";
+import { startupById } from "@/mock/startups";
+import { applications } from "@/mock/applications";
 
 const drawerTabs = ["Score", "Evidence", "Risks", "Claims", "Human Review"] as const;
 
 export default function Leaderboard() {
-  const all = rankedForProblem("plastic-recycling");
-  const { statusOf } = useStore();
+  const { statusOf, liveEval } = useStore();
+  let all = rankedForProblem("plastic-recycling");
+  if (liveEval) {
+    const liveApp = { ...applications[0], id: "APP-LIVE" };
+    const liveStartup = { ...startupById("ecotech"), name: "Live Evaluated Startup" };
+    const liveEv = adaptLiveEval(liveEval, "APP-LIVE");
+    all = [...all, { app: liveApp, ev: liveEv, startup: liveStartup, rank: 0 }];
+    all = all.sort((a, b) => b.ev.overall - a.ev.overall).map((r, i) => ({ ...r, rank: i + 1 }));
+  }
+
   const [risk, setRisk] = useState("All");
   const [womenOnly, setWomenOnly] = useState(false);
   const [state, setState] = useState("All");
