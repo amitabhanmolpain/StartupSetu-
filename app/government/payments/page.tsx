@@ -36,7 +36,7 @@ export default function PaymentsPage() {
   return (
     <div className="space-y-6">
       <PageHeader eyebrow="Milestone-based escrow" title="Payments" subtitle="EcoTech Solutions — Plastic Recycling pilot (PIL-0091). Money moves only when a human approves a milestone." />
-      <Alert tone="warning" title="DEMO MODE — No real payments are processed." icon={ShieldOff}>All amounts, escrow balances and transfers on this screen are simulated for the SIH prototype.</Alert>
+      <Alert tone="warning" title="DEMO MODE — No real payments are processed." icon={ShieldOff}>All amounts, escrow balances and transfers on this screen are simulated.</Alert>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Total pilot budget" value={payments.totalLakh * 100000} prefix="₹" icon={Wallet} accent="blue" index={0} />

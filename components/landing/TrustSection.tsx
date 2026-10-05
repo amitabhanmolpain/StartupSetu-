@@ -120,7 +120,7 @@ export function Footer() {
         ))}
       </div>
       <p className="mx-auto mt-10 max-w-7xl px-5 text-xs text-slate-500 md:px-8">
-        Smart India Hackathon prototype · All data shown is simulated · No real identity, payment or government systems are connected.
+        All data shown is simulated · No real identity, payment or government systems are connected.
       </p>
     </footer>
   );

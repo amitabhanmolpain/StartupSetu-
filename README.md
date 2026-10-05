@@ -1,4 +1,4 @@
-# StartupSetu — SIH Frontend Prototype
+# StartupSetu
 
 > **Where Government Problems Meet Startup Solutions.**
 > AI recommends. Humans decide.

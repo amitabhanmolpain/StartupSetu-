@@ -86,7 +86,7 @@ export function DemoBadge({ className }: { className?: string }) {
   return (
     <span className={cn("inline-flex items-center gap-1.5 rounded-full border border-saffron-400/30 bg-saffron-500/10 px-2.5 py-1 text-[11px] font-medium tracking-wide text-saffron-300", className)}>
       <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-saffron-400" />
-      StartupSetu • SIH Prototype
+      StartupSetu
     </span>
   );
 }

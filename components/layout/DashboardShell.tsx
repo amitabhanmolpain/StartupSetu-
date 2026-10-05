@@ -50,7 +50,7 @@ export function DashboardShell({ role, children }: { role: Role; children: React
         <Topbar role={role} onMenu={() => setMobileOpen(true)} />
         <main className="mx-auto w-full max-w-[1400px] flex-1 px-4 py-6 md:px-8 md:py-8">{children}</main>
         <footer className="border-t border-white/[0.05] px-8 py-4 text-xs text-slate-500">
-          StartupSetu — SIH Prototype · All data is simulated · DEMO MODE: no real payments, identity checks or AI calls are made.
+          StartupSetu · All data is simulated · DEMO MODE: no real payments, identity checks or AI calls are made.
         </footer>
       </div>
     </div>
